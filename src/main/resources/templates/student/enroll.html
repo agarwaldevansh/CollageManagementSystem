@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Subjects – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Student Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/student/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/student/enroll}" class="nav-item active"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>My Subjects</a>
+      <a th:href="@{/student/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/student/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/student/fees}" class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/student/timetable}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar"></i></span>Timetable</a>
+      <a th:href="@{/student/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${student?.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}">S</div>
+        <div class="sidebar-user-info">
+          <div class="user-name" th:text="${student?.person?.name ?: 'Student'}"></div>
+          <div class="user-role" th:text="${currentYear!=null}?'Year '+${currentYear}:'Student'"></div>
+        </div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">My Subjects</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/student/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+
+      <!-- Currently enrolled -->
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-header">
+          <h3>Enrolled Subjects</h3>
+          <span class="badge badge-primary" th:text="${#lists.size(enrolledSubjects)}+' total'"></span>
+        </div>
+        <div class="table-wrapper"><table>
+          <thead><tr><th>#</th><th>Subject</th><th>Type</th><th>Faculty</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(enrolledSubjects)}">
+              <td colspan="5" style="text-align:center;padding:24px;color:var(--slate-400);">Not enrolled in any subjects yet.</td>
+            </tr>
+            <tr th:each="s, iter : ${enrolledSubjects}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td><strong th:text="${s.subjectName}"></strong></td>
+              <td><span class="badge" th:classappend="${s.subjectType=='COMPULSORY'}?' badge-primary':' badge-warning'" th:text="${s.subjectType}"></span></td>
+              <td th:text="${s.faculty?.person?.name ?: '—'}"></td>
+              <td>
+                <span th:if="${s.subjectType=='COMPULSORY'}" style="font-size:.75rem;color:var(--slate-400);">
+                  <i data-lucide="lock" style="width:12px;height:12px;"></i> Mandatory
+                </span>
+                <form th:if="${s.subjectType!='COMPULSORY'}" th:action="@{/student/enroll/drop}" method="post" style="display:inline;" onsubmit="return confirm('Drop this elective?')">
+                  <input type="hidden" name="subjectId" th:value="${s.subjectId}"/>
+                  <button type="submit" class="btn btn-danger btn-sm">Drop</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- Available electives -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Available Electives</h3>
+          <span style="font-size:.75rem;color:var(--slate-400);">Optional subjects from your course</span>
+        </div>
+        <div th:if="${student?.course==null}" style="padding:24px;text-align:center;color:var(--slate-400);">No course assigned. Contact admin.</div>
+        <div class="table-wrapper" th:if="${student?.course!=null}"><table>
+          <thead><tr><th>#</th><th>Subject</th><th>Faculty</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(availableElectives)}">
+              <td colspan="4" style="text-align:center;padding:24px;color:var(--slate-400);">All electives enrolled, or none available for your course.</td>
+            </tr>
+            <tr th:each="s, iter : ${availableElectives}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td><strong th:text="${s.subjectName}"></strong></td>
+              <td th:text="${s.faculty?.person?.name ?: '—'}"></td>
+              <td>
+                <form th:action="@{/student/enroll}" method="post" style="display:inline;">
+                  <input type="hidden" name="subjectId" th:value="${s.subjectId}"/>
+                  <button type="submit" class="btn btn-success btn-sm">
+                    <i data-lucide="plus" style="width:12px;height:12px;"></i> Enroll
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

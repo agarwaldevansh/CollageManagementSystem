@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enter Results – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Faculty Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/faculty/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/faculty/my-students}" class="nav-item"><span class="nav-icon"><i data-lucide="users"></i></span>My Students</a>
+      <a th:href="@{/faculty/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Mark Attendance</a>
+      <a th:href="@{/faculty/exams}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>Exams</a>
+      <a th:href="@{/faculty/results}" class="nav-item active"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Enter Results</a>
+      <a th:href="@{/faculty/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${faculty?.person?.name?.substring(0,1)?.toUpperCase() ?: 'F'}">F</div>
+        <div class="sidebar-user-info"><div class="user-name" th:text="${faculty?.person?.name ?: 'Faculty'}"></div><div class="user-role" th:text="${faculty?.employeeId ?: ''}"></div></div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">Enter Results</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/faculty/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+      <div class="table-card">
+        <div class="table-header"><h3>Results Entered</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addModal')">
+            <i data-lucide="plus" style="width:13px;height:13px;"></i> Add Result
+          </button>
+        </div>
+        <div class="table-wrapper"><table>
+          <thead><tr><th>#</th><th>Student</th><th>Subject</th><th>Exam Type</th><th>Marks</th><th>Grade</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(results)}"><td colspan="6" style="text-align:center;padding:24px;color:var(--slate-400);">No results entered yet.</td></tr>
+            <tr th:each="r, iter : ${results}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td th:text="${r.student?.person?.name ?: '—'}"></td>
+              <td th:text="${r.exam?.subject?.subjectName ?: '—'}"></td>
+              <td th:text="${r.exam?.examType ?: '—'}"></td>
+              <td><strong th:text="${r.marks ?: '—'}"></strong></td>
+              <td><span class="badge" th:classappend="${r.grade=='F'}?' badge-danger':(${r.grade=='A+' or r.grade=='A'}?' badge-success':' badge-warning')" th:text="${r.grade ?: '—'}"></span></td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+          <div class="modal-header"><h3>Enter Result</h3><button class="modal-close" onclick="closeModal('addModal')">✕</button></div>
+          <form th:action="@{/faculty/results/add}" method="post">
+            <div class="form-group"><label>Student *</label>
+              <select name="studentId" class="form-select" required>
+                <option value="">-- Select Student --</option>
+                <option th:each="s : ${students}" th:value="${s.studentId}"
+                        th:text="${s.person?.name ?: 'Unknown'}+' ('+${s.registrationNumber ?: ''}+')'"></option>
+              </select>
+            </div>
+            <div class="form-group"><label>Exam *</label>
+              <select name="examId" class="form-select" required>
+                <option value="">-- Select Exam --</option>
+                <option th:each="e : ${exams}" th:value="${e.examId}"
+                        th:text="${e.subject?.subjectName ?: '?'}+' — '+${e.examType ?: '?'}"></option>
+              </select>
+            </div>
+            <div class="form-group"><label>Marks (0–100) *</label>
+              <input type="number" name="marks" class="form-control" min="0" max="100" step="0.5" required/>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Save Result</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  function openModal(id){{document.getElementById(id).classList.add('open');}}function closeModal(id){{document.getElementById(id).classList.remove('open');}}window.onclick=e=>{{if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('open');}}
+</script>
+</body>
+</html>

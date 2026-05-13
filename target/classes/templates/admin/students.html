@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Students – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i data-lucide="graduation-cap"></i></div>
+      <div class="brand-text"><h3>CollegeMS</h3><span>Admin Portal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/admin/dashboard}"      class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/admin/students}"       class="nav-item active"><span class="nav-icon"><i data-lucide="users"></i></span>Students</a>
+      <a th:href="@{/admin/faculty}"        class="nav-item"><span class="nav-icon"><i data-lucide="user-check"></i></span>Faculty</a>
+      <a th:href="@{/admin/departments}"    class="nav-item"><span class="nav-icon"><i data-lucide="building-2"></i></span>Departments</a>
+      <a th:href="@{/admin/courses}"        class="nav-item"><span class="nav-icon"><i data-lucide="book-open"></i></span>Courses</a>
+      <a th:href="@{/admin/subjects}"       class="nav-item"><span class="nav-icon"><i data-lucide="file-text"></i></span>Subjects</a>
+      <a th:href="@{/admin/attendance}"     class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/admin/results}"        class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/admin/fees}"           class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/admin/faculty-mapping}"class="nav-item"><span class="nav-icon"><i data-lucide="network"></i></span>Faculty Mapping</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">A</div>
+        <div class="sidebar-user-info"><div class="user-name">Administrator</div><div class="user-role">System Admin</div></div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb">
+          <span class="page-title">Students</span>
+          <span class="breadcrumb-sep">/</span>
+          <span class="page-subtitle" th:text="'Total: ' + ${#lists.size(students)}"></span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>All Students</h3>
+          <span class="badge badge-slate" th:text="${#lists.size(students)} + ' records'"></span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Reg. No.</th><th>Email</th>
+                <th>Dept</th><th>Course</th><th>Year</th><th>Subjects</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:if="${#lists.isEmpty(students)}">
+                <td colspan="9" style="text-align:center;padding:32px;color:var(--slate-400);">
+                  No students registered yet.
+                </td>
+              </tr>
+              <tr th:each="s, iter : ${students}">
+                <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal-500),var(--teal-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:700;flex-shrink:0;"
+                         th:text="${s.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}"></div>
+                    <strong style="font-size:.8125rem;" th:text="${s.person?.name ?: '—'}"></strong>
+                  </div>
+                </td>
+                <td><span class="badge badge-info" th:text="${s.registrationNumber ?: '—'}"></span></td>
+                <td style="color:var(--slate-500);" th:text="${s.person?.email ?: '—'}"></td>
+                <td th:text="${s.department?.departmentName ?: '—'}"></td>
+                <td th:text="${s.course?.courseName ?: '—'}"></td>
+                <td>
+                  <span class="badge badge-primary"
+                        th:text="${s.currentYear != null} ? 'Yr ' + ${s.currentYear} : '—'"></span>
+                </td>
+                <td>
+                  <a th:href="@{/admin/students/{id}/enrollments(id=${s.studentId})}"
+                     class="badge badge-success" style="cursor:pointer;"
+                     th:text="${#lists.size(s.enrolledSubjects)} + ' subj'"></a>
+                </td>
+                <td style="display:flex;gap:6px;">
+                  <a th:href="@{/admin/students/{id}/enrollments(id=${s.studentId})}"
+                     class="btn btn-ghost btn-sm" title="View enrollments">
+                    <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                  </a>
+                  <form th:action="@{/admin/students/delete/{id}(id=${s.studentId})}"
+                        method="post" style="display:inline;"
+                        onsubmit="return confirm('Delete this student?')">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const s = document.getElementById('sidebar'), h = document.getElementById('hamburger');
+  h?.addEventListener('click', () => s.classList.toggle('open'));
+  document.addEventListener('click', e => { if (!s.contains(e.target) && !h?.contains(e.target)) s.classList.remove('open'); });
+</script>
+</body>
+</html>

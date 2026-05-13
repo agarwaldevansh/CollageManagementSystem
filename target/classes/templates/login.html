@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <h2>EduManage</h2>
+      <p>College Management System</p>
+    </div>
+
+    <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <p class="auth-title">Sign in to your account</p>
+
+    <form method="post" th:action="@{/login}">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="email" class="form-control"
+               placeholder="you@college.edu" required autofocus/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control"
+               placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:4px;">
+        Sign In
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.8125rem;color:var(--slate-400);">
+      New here?
+      <a th:href="@{/signup}" style="color:var(--teal-600);font-weight:600;">Create an account</a>
+    </p>
+
+    <!-- Demo credentials box -->
+    <div style="margin-top:20px;padding:14px 16px;background:var(--slate-50);border-radius:var(--radius-sm);border:1px solid var(--slate-200);">
+      <p style="font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--slate-400);margin-bottom:8px;">
+        Demo Credentials
+      </p>
+      <div style="display:grid;gap:5px;">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;">
+          <span style="color:var(--slate-500);">🔑 Admin</span>
+          <span style="font-family:'JetBrains Mono',monospace;color:var(--slate-700);">admin@college.com / admin123</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;">
+          <span style="color:var(--slate-500);">📚 Student</span>
+          <span style="color:var(--slate-400);">Register via Sign Up</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;">
+          <span style="color:var(--slate-500);">👨‍🏫 Faculty</span>
+          <span style="color:var(--slate-400);">Register via Sign Up</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>

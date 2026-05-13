@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subjects – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i data-lucide="graduation-cap"></i></div>
+      <div class="brand-text"><h3>CollegeMS</h3><span>Admin Portal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/admin/dashboard}"      class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/admin/students}"       class="nav-item"><span class="nav-icon"><i data-lucide="users"></i></span>Students</a>
+      <a th:href="@{/admin/faculty}"        class="nav-item"><span class="nav-icon"><i data-lucide="user-check"></i></span>Faculty</a>
+      <a th:href="@{/admin/departments}"    class="nav-item"><span class="nav-icon"><i data-lucide="building-2"></i></span>Departments</a>
+      <a th:href="@{/admin/courses}"        class="nav-item"><span class="nav-icon"><i data-lucide="book-open"></i></span>Courses</a>
+      <a th:href="@{/admin/subjects}"       class="nav-item active"><span class="nav-icon"><i data-lucide="file-text"></i></span>Subjects</a>
+      <a th:href="@{/admin/attendance}"     class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/admin/results}"        class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/admin/fees}"           class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/admin/faculty-mapping}"class="nav-item"><span class="nav-icon"><i data-lucide="network"></i></span>Faculty Mapping</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">A</div>
+        <div class="sidebar-user-info"><div class="user-name">Administrator</div><div class="user-role">System Admin</div></div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">Subjects</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+
+      <!-- Type legend -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+        <span class="badge badge-primary">COMPULSORY</span>
+        <span style="font-size:.75rem;color:var(--slate-400);">Auto-enrolled for all students in the course</span>
+        <span class="badge badge-warning" style="margin-left:10px;">ELECTIVE</span>
+        <span style="font-size:.75rem;color:var(--slate-400);">Students choose optionally</span>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>All Subjects</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addModal')">
+            <i data-lucide="plus" style="width:13px;height:13px;"></i> Add Subject
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Subject</th><th>Type</th><th>Course</th>
+                <th>Dept</th><th>Faculty</th><th>Students</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:if="${#lists.isEmpty(subjects)}">
+                <td colspan="8" style="text-align:center;padding:32px;color:var(--slate-400);">
+                  No subjects yet. Add courses and faculty first.
+                </td>
+              </tr>
+              <tr th:each="s, iter : ${subjects}">
+                <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+                <td><strong th:text="${s.subjectName}"></strong></td>
+                <td>
+                  <span class="badge"
+                        th:classappend="${s.subjectType == 'COMPULSORY'} ? ' badge-primary' : ' badge-warning'"
+                        th:text="${s.subjectType}"></span>
+                </td>
+                <td th:text="${s.course?.courseName ?: '—'}"></td>
+                <td th:text="${s.course?.department?.departmentName ?: '—'}"></td>
+                <td>
+                  <span th:if="${s.faculty != null}" th:text="${s.faculty.person?.name ?: '—'}"></span>
+                  <span th:if="${s.faculty == null}" style="color:var(--danger);font-size:.75rem;">⚠ Unassigned</span>
+                </td>
+                <td>
+                  <span class="badge badge-slate"
+                        th:text="${s.studentCount} + ' enrolled'"></span>
+                </td>
+                <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <!--
+                    FIX: All data passed via data-* attributes.
+                    Thymeleaf allows numeric and boolean expressions in th:attr,
+                    and string attributes are safe in data-* (they are not DOM event handlers).
+                    The JS event listener reads dataset properties — no th:onclick needed.
+                  -->
+                  <button class="btn btn-ghost btn-sm edit-subj-btn"
+                          th:attr="data-id=${s.subjectId},
+                                   data-name=${s.subjectName},
+                                   data-type=${s.subjectType},
+                                   data-course=${s.course != null ? s.course.courseId : 0},
+                                   data-faculty=${s.faculty != null ? s.faculty.facultyId : 0}">
+                    <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+                  </button>
+                  <form th:action="@{/admin/subjects/delete/{id}(id=${s.subjectId})}"
+                        method="post" style="display:inline;"
+                        onsubmit="return confirm('Delete this subject? Students will be unenrolled.')">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD MODAL -->
+      <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3>Add New Subject</h3>
+            <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+          </div>
+          <form th:action="@{/admin/subjects/add}" method="post" onsubmit="return validateAddSubj(this)">
+            <div class="form-group">
+              <label>Subject Name *</label>
+              <input type="text" name="subjectName" class="form-control"
+                     placeholder="e.g. Data Structures" required maxlength="100"/>
+            </div>
+            <div class="form-group">
+              <label>Type *</label>
+              <select name="subjectType" class="form-select" required>
+                <option value="COMPULSORY">COMPULSORY — auto-enrolled for all course students</option>
+                <option value="ELECTIVE">ELECTIVE — student chooses voluntarily</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Course *</label>
+              <select name="courseId" class="form-select" required>
+                <option value="">-- Select Course --</option>
+                <option th:each="c : ${courses}"
+                        th:value="${c.courseId}"
+                        th:text="${c.courseName}"></option>
+              </select>
+              <small th:if="${#lists.isEmpty(courses)}" style="color:var(--danger);font-size:.75rem;">
+                No courses found — add courses first.
+              </small>
+            </div>
+            <div class="form-group">
+              <label>Assign Faculty *</label>
+              <select name="facultyId" class="form-select" required>
+                <option value="">-- Select Faculty --</option>
+                <option th:each="f : ${facultyList}"
+                        th:value="${f.facultyId}"
+                        th:text="${f.person?.name}"></option>
+              </select>
+              <small th:if="${#lists.isEmpty(facultyList)}" style="color:var(--danger);font-size:.75rem;">
+                No faculty found — register faculty via Sign Up first.
+              </small>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Save Subject</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- EDIT MODAL -->
+      <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3>Edit Subject</h3>
+            <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+          </div>
+          <form id="editSubjForm" method="post">
+            <div class="form-group">
+              <label>Subject Name *</label>
+              <input type="text" name="subjectName" id="eSubjName"
+                     class="form-control" required maxlength="100"/>
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select name="subjectType" id="eSubjType" class="form-select">
+                <option value="COMPULSORY">COMPULSORY</option>
+                <option value="ELECTIVE">ELECTIVE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Course</label>
+              <select name="courseId" id="eSubjCourse" class="form-select">
+                <option value="">-- Select Course --</option>
+                <option th:each="c : ${courses}"
+                        th:value="${c.courseId}"
+                        th:text="${c.courseName}"></option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Faculty</label>
+              <select name="facultyId" id="eSubjFaculty" class="form-select">
+                <option value="">-- Select Faculty --</option>
+                <option th:each="f : ${facultyList}"
+                        th:value="${f.facultyId}"
+                        th:text="${f.person?.name}"></option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Update Subject</button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  /* Sidebar mobile toggle */
+  const _s = document.getElementById('sidebar');
+  const _h = document.getElementById('hamburger');
+  _h?.addEventListener('click', () => _s.classList.toggle('open'));
+  document.addEventListener('click', e => {
+    if (!_s.contains(e.target) && !_h?.contains(e.target)) _s.classList.remove('open');
+  });
+
+  /* Modal helpers */
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  window.onclick = e => {
+    if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+  };
+
+  /* Add subject validation */
+  function validateAddSubj(form) {
+    if (!form.courseId.value)  { alert('Please select a course.');         return false; }
+    if (!form.facultyId.value) { alert('Please assign a faculty member.'); return false; }
+    return true;
+  }
+
+  /*
+   * FIX: Edit subject — read all values from data-* attributes on the button.
+   * This is the correct Thymeleaf 3.x pattern when string data must reach JS.
+   * data-* attributes are NOT DOM event handlers, so Thymeleaf allows any value.
+   */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.edit-subj-btn');
+    if (!btn) return;
+
+    const id      = btn.dataset.id;
+    const name    = btn.dataset.name;
+    const type    = btn.dataset.type;
+    const courseId  = btn.dataset.course;
+    const facultyId = btn.dataset.faculty;
+
+    document.getElementById('eSubjName').value = name || '';
+    document.getElementById('eSubjType').value = type || 'COMPULSORY';
+
+    /* Set selected option by value — safe string comparison */
+    const cSelect = document.getElementById('eSubjCourse');
+    cSelect.value = (courseId && courseId !== '0') ? courseId : '';
+
+    const fSelect = document.getElementById('eSubjFaculty');
+    fSelect.value = (facultyId && facultyId !== '0') ? facultyId : '';
+
+    document.getElementById('editSubjForm').action = '/admin/subjects/update/' + id;
+    openModal('editModal');
+  });
+</script>
+</body>
+</html>

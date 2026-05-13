@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Student Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/student/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/student/enroll}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>My Subjects</a>
+      <a th:href="@{/student/attendance}" class="nav-item active"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/student/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/student/fees}" class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/student/timetable}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar"></i></span>Timetable</a>
+      <a th:href="@{/student/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${student?.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}">S</div>
+        <div class="sidebar-user-info">
+          <div class="user-name" th:text="${student?.person?.name ?: 'Student'}"></div>
+          <div class="user-role" th:text="${currentYear!=null}?'Year '+${currentYear}:'Student'"></div>
+        </div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">Attendance</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/student/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <!-- Summary -->
+      <div class="table-card" style="padding:20px;margin-bottom:20px;max-width:460px;">
+        <h3 style="font-size:.9375rem;font-weight:700;margin-bottom:14px;">Attendance Summary</h3>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:var(--slate-500);">Overall Percentage</span>
+          <strong th:text="${attendancePct}+'%'">0%</strong>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"
+               th:style="'width:'+${attendancePct}+'%'"
+               th:classappend="${attendancePct < 60}?' danger':(${attendancePct < 75}?' warning':'')"></div>
+        </div>
+        <p style="font-size:.75rem;margin-top:10px;padding:8px 12px;border-radius:var(--radius-sm);"
+           th:style="${attendanceStatus=='GOOD'}?'background:var(--teal-50);color:var(--teal-700);':(${attendanceStatus=='WARNING'}?'background:#FFFBEB;color:#92400E;':'background:#FEF2F2;color:#991B1B;')">
+          <span th:text="${attendanceStatus=='GOOD'}?'✓ Good standing — above 75%.':(${attendanceStatus=='WARNING'}?'⚠ Below 75% — attend more classes.':'✗ Critical — below 60%. Exam eligibility at risk.')"></span>
+        </p>
+      </div>
+
+      <!-- Records -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Attendance Records</h3>
+          <span class="badge badge-slate" th:text="${#lists.size(attendanceList)}+' entries'"></span>
+        </div>
+        <div class="table-wrapper"><table>
+          <thead><tr><th>#</th><th>Subject</th><th>Date</th><th>Status</th><th>Remarks</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(attendanceList)}">
+              <td colspan="5" style="text-align:center;padding:24px;color:var(--slate-400);">No attendance records yet.</td>
+            </tr>
+            <tr th:each="a, iter : ${attendanceList}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td th:text="${a.subject?.subjectName ?: '—'}"></td>
+              <td th:text="${a.id?.date ?: '—'}"></td>
+              <td><span class="badge" th:classappend="${a.status=='PRESENT'}?' badge-success':' badge-danger'" th:text="${a.status ?: '—'}"></span></td>
+              <td style="color:var(--slate-500);" th:text="${a.remarks ?: '—'}"></td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

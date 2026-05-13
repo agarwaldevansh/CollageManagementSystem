@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fees – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Admin Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/admin/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/admin/students}" class="nav-item"><span class="nav-icon"><i data-lucide="users"></i></span>Students</a>
+      <a th:href="@{/admin/faculty}" class="nav-item"><span class="nav-icon"><i data-lucide="user-check"></i></span>Faculty</a>
+      <a th:href="@{/admin/departments}" class="nav-item"><span class="nav-icon"><i data-lucide="building-2"></i></span>Departments</a>
+      <a th:href="@{/admin/courses}" class="nav-item"><span class="nav-icon"><i data-lucide="book-open"></i></span>Courses</a>
+      <a th:href="@{/admin/subjects}" class="nav-item"><span class="nav-icon"><i data-lucide="file-text"></i></span>Subjects</a>
+      <a th:href="@{/admin/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/admin/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/admin/fees}" class="nav-item active"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/admin/faculty-mapping}" class="nav-item"><span class="nav-icon"><i data-lucide="network"></i></span>Faculty Mapping</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user"><div class="sidebar-avatar">A</div><div class="sidebar-user-info"><div class="user-name">Administrator</div><div class="user-role">System Admin</div></div></div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">Fees</span></div>
+      </div>
+      <div class="topbar-right"><a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="user"></i></a></div>
+    </header>
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="table-card">
+        <div class="table-header"><h3>Fee Records</h3>
+          <span class="badge badge-slate" th:text="${#lists.size(feesList)}+' records'"></span>
+        </div>
+        <div class="table-wrapper"><table>
+          <thead><tr><th>#</th><th>Student</th><th>Amount (₹)</th><th>Payment Date</th><th>Status</th><th>Update</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(feesList)}">
+              <td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">No fee records.</td>
+            </tr>
+            <tr th:each="f, iter : ${feesList}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td th:text="${f.student?.person?.name ?: '—'}"></td>
+              <td><strong th:text="${f.amount ?: '—'}"></strong></td>
+              <td th:text="${f.paymentDate ?: '—'}"></td>
+              <td><span class="badge" th:classappend="${f.paymentStatus=='PAID'}?' badge-success':(${f.paymentStatus=='PENDING'}?' badge-warning':' badge-danger')" th:text="${f.paymentStatus}"></span></td>
+              <td>
+                <form th:action="@{/admin/fees/update/{id}(id=${f.feeId})}" method="post" style="display:flex;gap:6px;align-items:center;">
+                  <select name="status" class="form-select" style="padding:4px 8px;font-size:.75rem;width:auto;">
+                    <option value="PAID">PAID</option><option value="PENDING">PENDING</option><option value="OVERDUE">OVERDUE</option>
+                  </select>
+                  <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

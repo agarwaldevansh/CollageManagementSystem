@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Student Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/student/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/student/enroll}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>My Subjects</a>
+      <a th:href="@{/student/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/student/results}" class="nav-item active"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/student/fees}" class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/student/timetable}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar"></i></span>Timetable</a>
+      <a th:href="@{/student/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${student?.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}">S</div>
+        <div class="sidebar-user-info">
+          <div class="user-name" th:text="${student?.person?.name ?: 'Student'}"></div>
+          <div class="user-role" th:text="${currentYear!=null}?'Year '+${currentYear}:'Student'"></div>
+        </div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">Results</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/student/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div class="table-card">
+        <div class="table-header"><h3>Exam Results</h3>
+          <span class="badge badge-slate" th:text="${#lists.size(results)}+' records'"></span>
+        </div>
+        <div class="table-wrapper"><table>
+          <thead><tr><th>#</th><th>Subject</th><th>Exam Type</th><th>Date</th><th>Marks /100</th><th>Grade</th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(results)}">
+              <td colspan="6" style="text-align:center;padding:24px;color:var(--slate-400);">No results yet.</td>
+            </tr>
+            <tr th:each="r, iter : ${results}">
+              <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+              <td th:text="${r.exam?.subject?.subjectName ?: '—'}"></td>
+              <td th:text="${r.exam?.examType ?: '—'}"></td>
+              <td th:text="${r.exam?.examDate ?: '—'}"></td>
+              <td><strong th:text="${r.marks ?: '—'}"></strong></td>
+              <td><span class="badge" th:classappend="${r.grade=='F'}?' badge-danger':(${r.grade=='A+' or r.grade=='A'}?' badge-success':' badge-warning')" th:text="${r.grade ?: '—'}"></span></td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="table-card" style="padding:16px;margin-top:16px;">
+        <h4 style="margin-bottom:10px;font-size:.875rem;font-weight:600;">Grade Scale</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-success">A+ ≥ 90</span><span class="badge badge-success">A ≥ 80</span>
+          <span class="badge badge-warning">B ≥ 70</span><span class="badge badge-warning">C ≥ 60</span>
+          <span class="badge badge-warning">D ≥ 50</span><span class="badge badge-danger">F &lt; 50</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

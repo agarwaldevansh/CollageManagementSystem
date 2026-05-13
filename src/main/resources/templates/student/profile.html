@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Student Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/student/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/student/enroll}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>My Subjects</a>
+      <a th:href="@{/student/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Attendance</a>
+      <a th:href="@{/student/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Results</a>
+      <a th:href="@{/student/fees}" class="nav-item"><span class="nav-icon"><i data-lucide="credit-card"></i></span>Fees</a>
+      <a th:href="@{/student/timetable}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar"></i></span>Timetable</a>
+      <a th:href="@{/student/profile}" class="nav-item active"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${student?.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}">S</div>
+        <div class="sidebar-user-info">
+          <div class="user-name" th:text="${student?.person?.name ?: 'Student'}"></div>
+          <div class="user-role" th:text="${currentYear!=null}?'Year '+${currentYear}:'Student'"></div>
+        </div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">My Profile</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/student/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div style="max-width:600px;">
+        <div class="table-card">
+          <div style="padding:28px;text-align:center;border-bottom:1px solid var(--slate-100);">
+            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal-500),var(--teal-700));display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.875rem;font-weight:700;margin-bottom:12px;"
+                 th:text="${student?.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}"></div>
+            <h2 style="font-size:1.25rem;font-weight:700;" th:text="${student?.person?.name}">Student</h2>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+              <span class="badge badge-success">Student</span>
+              <span class="badge badge-info" th:text="${student?.registrationNumber ?: '—'}"></span>
+              <span class="badge badge-primary" th:text="${currentYear!=null}?'Year '+${currentYear}:''"></span>
+            </div>
+          </div>
+          <div style="padding:24px;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;width:42%;">Registration No.</td><td style="padding:11px 0;font-weight:600;color:var(--teal-700);" th:text="${student?.registrationNumber ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Email</td><td style="padding:11px 0;" th:text="${student?.person?.email ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Phone</td><td style="padding:11px 0;" th:text="${student?.person?.phone ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Gender</td><td style="padding:11px 0;" th:text="${student?.person?.gender ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Date of Birth</td><td style="padding:11px 0;" th:text="${student?.person?.dob ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Address</td><td style="padding:11px 0;" th:text="${student?.address ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Department</td><td style="padding:11px 0;" th:text="${student?.department?.departmentName ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Course</td><td style="padding:11px 0;" th:text="${student?.course?.courseName ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Admission Year</td><td style="padding:11px 0;" th:text="${student?.admissionYear ?: '—'}"></td></tr>
+              <tr><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Current Year</td><td style="padding:11px 0;"><span class="badge badge-primary" th:text="${currentYear!=null}?'Year '+${currentYear}:'—'"></span></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Enrolled subjects -->
+        <div class="table-card" style="margin-top:16px;">
+          <div class="table-header"><h3>Enrolled Subjects</h3>
+            <a th:href="@{/student/enroll}" class="btn btn-ghost btn-sm">Manage</a>
+          </div>
+          <div class="table-wrapper"><table>
+            <thead><tr><th>#</th><th>Subject</th><th>Type</th><th>Faculty</th></tr></thead>
+            <tbody>
+              <tr th:if="${#lists.isEmpty(student?.enrolledSubjects)}">
+                <td colspan="4" style="text-align:center;padding:16px;color:var(--slate-400);">No subjects. <a th:href="@{/student/enroll}">Enroll →</a></td>
+              </tr>
+              <tr th:each="s, iter : ${student?.enrolledSubjects}">
+                <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+                <td th:text="${s.subjectName}"></td>
+                <td><span class="badge" th:classappend="${s.subjectType=='COMPULSORY'}?' badge-primary':' badge-warning'" th:text="${s.subjectType}"></span></td>
+                <td th:text="${s.faculty?.person?.name ?: '—'}"></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

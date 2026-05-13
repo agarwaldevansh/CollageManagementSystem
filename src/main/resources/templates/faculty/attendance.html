@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Attendance – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i data-lucide="graduation-cap"></i></div>
+      <div class="brand-text"><h3>CollegeMS</h3><span>Faculty Portal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/faculty/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/faculty/my-students}" class="nav-item"><span class="nav-icon"><i data-lucide="users"></i></span>My Students</a>
+      <a th:href="@{/faculty/attendance}" class="nav-item active"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Mark Attendance</a>
+      <a th:href="@{/faculty/exams}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>Exams</a>
+      <a th:href="@{/faculty/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Enter Results</a>
+      <a th:href="@{/faculty/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${faculty?.person?.name?.substring(0,1)?.toUpperCase() ?: 'F'}">F</div>
+        <div class="sidebar-user-info">
+          <div class="user-name" th:text="${faculty?.person?.name ?: 'Faculty'}">Faculty</div>
+          <div class="user-role" th:text="${faculty?.employeeId ?: 'Faculty'}">ID</div>
+        </div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb">
+          <span class="page-title">Mark Attendance</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/faculty/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+      <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"></div>
+
+      <div class="step-pills" style="margin-bottom:20px;">
+        <div th:class="${selectedSubjectId==null}?'step-pill active':'step-pill done'">① Select Subject &amp; Date</div>
+        <div th:class="${selectedSubjectId!=null and #lists.isEmpty(students)}?'step-pill active':(${selectedSubjectId!=null}?'step-pill active':'step-pill')">② Review Students</div>
+        <div th:class="${selectedSubjectId!=null and not #lists.isEmpty(students)}?'step-pill active':'step-pill'">③ Save</div>
+      </div>
+
+      <!-- Step 1: Select subject + date -->
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-header"><h3>Step 1 — Select Subject &amp; Date</h3></div>
+        <div style="padding:20px;">
+          <form th:action="@{/faculty/attendance/load}" method="get">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Subject *</label>
+                <select name="subjectId" class="form-select" required>
+                  <option value="">-- Select Subject --</option>
+                  <option th:each="s : ${subjects}" th:value="${s.subjectId}"
+                          th:selected="${s.subjectId==selectedSubjectId}"
+                          th:text="${s.subjectName}"></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date *</label>
+                <input type="date" name="date" class="form-control"
+                       th:value="${selectedDate ?: today}" required/>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="search" style="width:14px;height:14px;"></i> Load Students
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Steps 2+3: Student list (shown after subject selected) -->
+      <div th:if="${selectedSubjectId!=null}">
+        <div th:if="${#lists.isEmpty(students)}"
+             style="padding:32px;text-align:center;color:var(--slate-400);background:#fff;border-radius:var(--radius-lg);border:1px solid var(--slate-100);">
+          <i data-lucide="users" style="width:32px;height:32px;margin:0 auto 8px;display:block;color:var(--slate-300);"></i>
+          No students enrolled in this subject yet.
+        </div>
+
+        <div th:if="${not #lists.isEmpty(students)}" class="table-card">
+          <div class="table-header">
+            <h3>Step 2 &amp; 3 — Mark &amp; Save</h3>
+            <span style="font-size:.8125rem;color:var(--slate-400);"
+                  th:text="${#lists.size(students)}+' students | '+${selectedDate}"></span>
+          </div>
+
+          <form th:action="@{/faculty/attendance/batch}" method="post" id="attForm">
+            <input type="hidden" name="subjectId"      th:value="${selectedSubjectId}"/>
+            <input type="hidden" name="attendanceDate" th:value="${selectedDate}"/>
+
+            <div class="bulk-bar">
+              <span style="font-size:.8125rem;font-weight:600;color:var(--slate-600);">Bulk:</span>
+              <button type="button" class="btn btn-success btn-sm" onclick="markAll('PRESENT')">
+                <i data-lucide="check" style="width:13px;height:13px;"></i> All Present
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="markAll('ABSENT')">
+                <i data-lucide="x" style="width:13px;height:13px;"></i> All Absent
+              </button>
+              <span style="font-size:.75rem;color:var(--slate-400);">Then adjust individually below.</span>
+            </div>
+
+            <div th:each="s : ${students}">
+              <div class="att-row">
+                <div class="att-student-info">
+                  <div class="att-avatar" th:text="${s.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}"></div>
+                  <div>
+                    <div class="att-name" th:text="${s.person?.name ?: '—'}"></div>
+                    <div class="att-regNo" th:text="${s.registrationNumber ?: '—'}"></div>
+                  </div>
+                </div>
+
+                <div class="radio-pill">
+                  <input type="radio"
+                         th:id="'p_'+${s.studentId}"
+                         th:name="'status_'+${s.studentId}"
+                         value="PRESENT"
+                         th:checked="${existingStatus!=null and existingStatus[s.studentId]=='PRESENT'}"/>
+                  <label th:for="'p_'+${s.studentId}" class="present">Present</label>
+                </div>
+
+                <div class="radio-pill">
+                  <input type="radio"
+                         th:id="'a_'+${s.studentId}"
+                         th:name="'status_'+${s.studentId}"
+                         value="ABSENT"
+                         th:checked="${existingStatus!=null and existingStatus[s.studentId]=='ABSENT'}"/>
+                  <label th:for="'a_'+${s.studentId}" class="absent">Absent</label>
+                </div>
+
+                <input type="text"
+                       th:name="'remarks_'+${s.studentId}"
+                       class="form-control"
+                       style="font-size:.75rem;padding:5px 8px;"
+                       placeholder="Remarks..."
+                       th:value="${existingRemarks!=null?existingRemarks[s.studentId]:''}"/>
+              </div>
+            </div>
+
+            <div style="padding:14px 16px;display:flex;gap:12px;align-items:center;background:var(--slate-50);border-top:1px solid var(--slate-100);">
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" style="width:14px;height:14px;"></i> Save Attendance
+              </button>
+              <span style="font-size:.75rem;color:var(--slate-400);">Duplicate entries are updated automatically.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  function markAll(v){document.querySelectorAll('input[type=radio][value='+v+']').forEach(r=>r.checked=true);}
+</script>
+</body>
+</html>

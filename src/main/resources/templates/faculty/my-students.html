@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Students – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Faculty Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/faculty/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/faculty/my-students}" class="nav-item active"><span class="nav-icon"><i data-lucide="users"></i></span>My Students</a>
+      <a th:href="@{/faculty/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Mark Attendance</a>
+      <a th:href="@{/faculty/exams}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>Exams</a>
+      <a th:href="@{/faculty/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Enter Results</a>
+      <a th:href="@{/faculty/profile}" class="nav-item"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${faculty?.person?.name?.substring(0,1)?.toUpperCase() ?: 'F'}">F</div>
+        <div class="sidebar-user-info"><div class="user-name" th:text="${faculty?.person?.name ?: 'Faculty'}"></div><div class="user-role" th:text="${faculty?.employeeId ?: ''}"></div></div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">My Students</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/faculty/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div th:if="${#maps.isEmpty(subjectStudentMap)}"
+           style="padding:40px;text-align:center;color:var(--slate-400);">No subjects assigned.</div>
+      <div th:each="entry : ${subjectStudentMap}" style="margin-bottom:20px;">
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <h3 th:text="${entry.key.subjectName}">Subject</h3>
+              <span style="font-size:.75rem;color:var(--slate-400);">
+                Course: <span th:text="${entry.key.course?.courseName ?: '—'}"></span>
+                &nbsp;|&nbsp;
+                <span class="badge" th:classappend="${entry.key.subjectType=='COMPULSORY'}?' badge-primary':' badge-warning'" th:text="${entry.key.subjectType}"></span>
+              </span>
+            </div>
+            <span class="badge badge-slate" th:text="${#lists.size(entry.value)}+' student(s)'"></span>
+          </div>
+          <div class="table-wrapper"><table>
+            <thead><tr><th>#</th><th>Name</th><th>Reg. No.</th><th>Email</th><th>Dept</th><th>Year</th></tr></thead>
+            <tbody>
+              <tr th:if="${#lists.isEmpty(entry.value)}">
+                <td colspan="6" style="text-align:center;padding:16px;color:var(--slate-400);">No students enrolled yet.</td>
+              </tr>
+              <tr th:each="s, iter : ${entry.value}">
+                <td style="color:var(--slate-400);" th:text="${iter.count}"></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--teal-500),var(--teal-700));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;font-weight:700;"
+                         th:text="${s.person?.name?.substring(0,1)?.toUpperCase() ?: 'S'}"></div>
+                    <strong style="font-size:.8125rem;" th:text="${s.person?.name ?: '—'}"></strong>
+                  </div>
+                </td>
+                <td><span class="badge badge-info" th:text="${s.registrationNumber ?: '—'}"></span></td>
+                <td style="color:var(--slate-500);font-size:.75rem;" th:text="${s.person?.email ?: '—'}"></td>
+                <td th:text="${s.department?.departmentName ?: '—'}"></td>
+                <td><span class="badge badge-primary" th:text="${s.currentYear!=null}?'Year '+${s.currentYear}:'—'"></span></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>

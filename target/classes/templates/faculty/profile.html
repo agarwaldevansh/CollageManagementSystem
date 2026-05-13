@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile – EduManage</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon"><i data-lucide="graduation-cap"></i></div><div class="brand-text"><h3>CollegeMS</h3><span>Faculty Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <a th:href="@{/faculty/dashboard}" class="nav-item"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>Dashboard</a>
+      <a th:href="@{/faculty/my-students}" class="nav-item"><span class="nav-icon"><i data-lucide="users"></i></span>My Students</a>
+      <a th:href="@{/faculty/attendance}" class="nav-item"><span class="nav-icon"><i data-lucide="calendar-check"></i></span>Mark Attendance</a>
+      <a th:href="@{/faculty/exams}" class="nav-item"><span class="nav-icon"><i data-lucide="clipboard-list"></i></span>Exams</a>
+      <a th:href="@{/faculty/results}" class="nav-item"><span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>Enter Results</a>
+      <a th:href="@{/faculty/profile}" class="nav-item active"><span class="nav-icon"><i data-lucide="user"></i></span>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" th:text="${faculty?.person?.name?.substring(0,1)?.toUpperCase() ?: 'F'}">F</div>
+        <div class="sidebar-user-info"><div class="user-name" th:text="${faculty?.person?.name ?: 'Faculty'}"></div><div class="user-role" th:text="${faculty?.employeeId ?: ''}"></div></div>
+      </div>
+      <a th:href="@{/logout}" class="nav-item logout"><span class="nav-icon"><i data-lucide="log-out"></i></span>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+        <div class="topbar-breadcrumb"><span class="page-title">My Profile</span></div>
+      </div>
+      <div class="topbar-right">
+        <a th:href="@{/faculty/profile}" class="topbar-icon-btn"><i data-lucide="user"></i></a>
+        <a th:href="@{/logout}" class="topbar-icon-btn"><i data-lucide="log-out"></i></a>
+      </div>
+    </header>
+    <main class="page-content">
+      <div style="max-width:600px;">
+        <div class="table-card">
+          <div style="padding:28px;text-align:center;border-bottom:1px solid var(--slate-100);">
+            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal-500),var(--teal-700));display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.875rem;font-weight:700;margin-bottom:12px;"
+                 th:text="${faculty?.person?.name?.substring(0,1)?.toUpperCase() ?: 'F'}"></div>
+            <h2 style="font-size:1.25rem;font-weight:700;" th:text="${faculty?.person?.name}">Faculty</h2>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+              <span class="badge badge-primary">Faculty Member</span>
+              <span class="badge badge-info" th:text="${faculty?.employeeId ?: '—'}"></span>
+            </div>
+          </div>
+          <div style="padding:24px;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;width:40%;">Employee ID</td><td style="padding:11px 0;font-weight:600;color:var(--teal-700);" th:text="${faculty?.employeeId ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Email</td><td style="padding:11px 0;" th:text="${faculty?.person?.email ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Phone</td><td style="padding:11px 0;" th:text="${faculty?.person?.phone ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Gender</td><td style="padding:11px 0;" th:text="${faculty?.person?.gender ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Date of Birth</td><td style="padding:11px 0;" th:text="${faculty?.person?.dob ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Department</td><td style="padding:11px 0;" th:text="${faculty?.department?.departmentName ?: '—'}"></td></tr>
+              <tr style="border-bottom:1px solid var(--slate-100);"><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Qualification</td><td style="padding:11px 0;" th:text="${faculty?.qualification ?: '—'}"></td></tr>
+              <tr><td style="padding:11px 0;color:var(--slate-400);font-size:.75rem;font-weight:600;text-transform:uppercase;">Experience</td><td style="padding:11px 0;" th:text="${faculty?.experience ?: '—'}"></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  lucide.createIcons();
+  const _s=document.getElementById('sidebar'),_h=document.getElementById('hamburger');
+  _h?.addEventListener('click',()=>_s.classList.toggle('open'));
+  document.addEventListener('click',e=>{if(!_s.contains(e.target)&&!_h?.contains(e.target))_s.classList.remove('open');});
+  
+</script>
+</body>
+</html>
