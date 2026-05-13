@@ -103,6 +103,6 @@ CRUD Operations
 Role-Based Authentication
 ---
 👨‍💻 Developed By
-Student Name: YOUR_NAME
-Course: Advanced Java / Enterprise Application Development
+Student Name: Devansh Agrawal AND Dhruvesh Biraris
+Course: Enterprise Application Development
 Academic Year: 2025-26
